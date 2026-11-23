@@ -115,10 +115,10 @@ git submodule update --remote portal
 
 ### 改 App 下载版本
 
-当前版本号（例如 `v3.10.13`）在 `index.html` 里硬编码 15 处、APK 文件名 8 处，全部要一起替换。**改完必须跑校验脚本，不要只靠肉眼搜索**：
+当前版本号（例如 `v3.10.14`）在 `index.html` 里硬编码 15 处、APK 文件名 8 处，全部要一起替换。**改完必须跑校验脚本，不要只靠肉眼搜索**：
 
 ```bash
-python tools/check_versions.py --apk /path/to/huhuashizhe_v3.10.13.apk
+python tools/check_versions.py --apk /path/to/huhuashizhe_v3.10.14.apk
 ```
 
 脚本会断言：版本号只有一种、APK 文件名与页面版本一致、页面引用的本地资源都存在、公示的 sha256 与 APK 实际值一致。任意一项失败即退出码 1，不允许 push。
