@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.part
+.DS_Store
+Thumbs.db
+apk_dl/
