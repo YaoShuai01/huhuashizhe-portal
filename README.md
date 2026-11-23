@@ -18,9 +18,16 @@
 
 ```text
 portal/
-├── index.html          # 整站：结构 + 样式 + 交互，全部在这一个文件里
+├── index.html          # 主站：结构 + 样式 + 交互，全部在这一个文件里
+├── quadcopter.html     # 子项目：四旋翼三维拆解工作台（内联 three.js）
+├── 404.html            # 品牌化 404 页，GitHub Pages 自动接管
+├── robots.txt          # 抓取规则，指向 sitemap
+├── sitemap.xml         # 两个页面的站点地图
 ├── .nojekyll           # 关闭 GitHub Pages 的 Jekyll 处理，不要删
 ├── README.md           # 本文档
+├── tools/
+│   ├── check_versions.py    # 发布前校验：版本号 / APK 名 / 本地资源 / sha256 断言
+│   └── build_singlefile.py  # 生成单文件版并打包 无人机官网.zip
 └── assets/
     └── img/            # 所有图片，jpg/webp/png
 ```
@@ -108,13 +115,17 @@ git submodule update --remote portal
 
 ### 改 App 下载版本
 
-搜索当前版本号（例如 `v2.4.1`）和 APK 文件名，所有出现位置都要替换：
+当前版本号（例如 `v3.10.13`）在 `index.html` 里硬编码 15 处、APK 文件名 8 处，全部要一起替换。**改完必须跑校验脚本，不要只靠肉眼搜索**：
 
 ```bash
-grep -n "v2.4.1\|huhuashizhe-v2.4.1.apk" index.html
+python tools/check_versions.py --apk /path/to/huhuashizhe_v3.10.13.apk
 ```
 
-涉及位置通常包括：JSON-LD 的 `softwareVersion` / `downloadUrl`、导航按钮、Hero 按钮、下载卡片、移动菜单。
+脚本会断言：版本号只有一种、APK 文件名与页面版本一致、页面引用的本地资源都存在、公示的 sha256 与 APK 实际值一致。任意一项失败即退出码 1，不允许 push。
+
+同一支脚本已挂进 CI（`.github/workflows/verify.yml`）：push / PR 到 `main` 时自动执行并顺带探测下载源可达性，断言失败直接标红，不再依赖人肉自检。
+
+涉及位置通常包括：JSON-LD 的 `softwareVersion` / `downloadUrl` / `sha256`、导航按钮、Hero 按钮、两张下载卡片、移动菜单、底部下载条。
 
 ### 新增一个板块
 
@@ -135,7 +146,8 @@ grep -n "v2.4.1\|huhuashizhe-v2.4.1.apk" index.html
 - [ ] 所有图片能加载，`alt` 不为空
 - [ ] 所有站内锚点可跳转，所有外链可打开
 - [ ] 下载按钮指向的 APK 链接真实存在
-- [ ] 版本号、APK 文件名在全文已同步
+- [ ] 版本号、APK 文件名在全文已同步（`python tools/check_versions.py --apk <apk路径>` 全绿）
+- [ ] 页面公示的 sha256 与 APK 实际值一致（同一支脚本断言）
 - [ ] 页面标题、描述、`og:image` 正确
 - [ ] `git status` 中没有误加的临时文件
 - [ ] `git diff` 只包含本次需求相关改动

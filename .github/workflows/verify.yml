@@ -1,0 +1,33 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 版本号 / APK 文件名 / 本地资源 / sha256 断言
+        run: python tools/check_versions.py
+
+      - name: 下载源与站点可达性
+        run: |
+          set -e
+          url=$(grep -o '"downloadUrl":"[^"]*"' index.html | head -1 | sed 's/.*"downloadUrl":"//; s/"$//')
+          echo "downloadUrl=$url"
+          curl -fsSI --max-time 30 "$url" | head -5
+          curl -fsSI --max-time 30 "https://yaoshuai01.github.io/huhuashizhe-portal/" | head -5
